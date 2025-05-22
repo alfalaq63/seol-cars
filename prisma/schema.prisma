@@ -1,0 +1,91 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model advertisement {
+  id        String   @id @default(cuid())
+  content   String
+  date      DateTime @default(now())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Branch {
+  id             String   @id @default(cuid())
+  name           String
+  address        String
+  primaryPhone   String
+  secondaryPhone String?
+  latitude       Float?
+  longitude      Float?
+  companyId      String
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  company        Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@index([companyId])
+}
+
+model Company {
+  id         String   @id @default(cuid())
+  name       String
+  speciality String
+  address    String
+  logoUrl    String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  latitude   Float?
+  longitude  Float?
+  branches   Branch[]
+}
+
+model Image {
+  id        String   @id @default(cuid())
+  url       String
+  newsId    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  news      News     @relation(fields: [newsId], references: [id], onDelete: Cascade)
+
+  @@index([newsId])
+}
+
+model Message {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  message   String   @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model News {
+  id        String   @id @default(cuid())
+  title     String
+  content   String
+  mainImage String?
+  date      DateTime @default(now())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  images    Image[]
+}
+
+model User {
+  id        String    @id @default(cuid())
+  name      String
+  email     String    @unique
+  password  String
+  role      Role      @default(USER)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+enum Role {
+  USER
+  ADMIN
+}
