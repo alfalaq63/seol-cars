@@ -5,10 +5,8 @@ generator client {
 }
 
 datasource db {
-  provider     = "mysql"
-  url          = env("DATABASE_URL")
-  // Add connection pooling configuration
-  relationMode = "prisma"
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 model advertisement {
@@ -63,7 +61,7 @@ model Message {
   id        String   @id @default(cuid())
   name      String
   email     String
-  message   String   @db.Text
+  message   String   // في PostgreSQL، يمكن استخدام String بدون @db.Text
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
