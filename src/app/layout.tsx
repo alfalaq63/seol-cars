@@ -5,6 +5,8 @@ import { Navbar } from '@/components/layout/navbar';
 import { Footer } from '@/components/layout/footer';
 import { Providers } from './providers';
 import { AdvertisementsTicker } from '@/components/advertisements-ticker';
+// Import the app initialization file
+import '@/lib/app-init';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",

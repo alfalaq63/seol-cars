@@ -1,10 +1,14 @@
 generator client {
   provider = "prisma-client-js"
+  // Add previewFeatures for better connection handling
+  previewFeatures = ["metrics"]
 }
 
 datasource db {
-  provider = "mysql"
-  url      = env("DATABASE_URL")
+  provider     = "mysql"
+  url          = env("DATABASE_URL")
+  // Add connection pooling configuration
+  relationMode = "prisma"
 }
 
 model advertisement {
