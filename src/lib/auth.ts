@@ -5,6 +5,16 @@ import { prisma } from './prisma';
 import { PrismaAdapter } from '@next-auth/prisma-adapter';
 import { Session } from 'next-auth';
 
+// Add error handling for database operations
+const handlePrismaOperation = async <T>(operation: () => Promise<T>): Promise<T | null> => {
+  try {
+    return await operation();
+  } catch (error) {
+    console.error('Prisma operation error:', error);
+    return null;
+  }
+};
+
 // Extend the built-in session types
 declare module 'next-auth' {
   interface Session {
@@ -52,17 +62,27 @@ export const authOptions: NextAuthOptions = {
           return null;
         }
 
-        const user = await prisma.user.findUnique({
-          where: {
-            email: credentials.email,
-          },
-        });
+        // Use handlePrismaOperation for database query
+        const user = await handlePrismaOperation(() =>
+          prisma.user.findUnique({
+            where: {
+              email: credentials.email,
+            },
+          })
+        );
 
         if (!user) {
           return null;
         }
 
-        const isPasswordValid = await compare(credentials.password, user.password);
+        // Handle password comparison with try-catch
+        let isPasswordValid = false;
+        try {
+          isPasswordValid = await compare(credentials.password, user.password);
+        } catch (error) {
+          console.error('Password comparison error:', error);
+          return null;
+        }
 
         if (!isPasswordValid) {
           return null;

@@ -13,6 +13,16 @@ const handleDatabaseError = (error: any) => {
   );
 };
 
+// Safer way to get server session
+const getSession = async () => {
+  try {
+    return await getServerSession(authOptions);
+  } catch (error) {
+    console.error('Error getting server session:', error);
+    return null;
+  }
+};
+
 // GET a specific advertisement
 export async function GET(
   request: NextRequest,
@@ -68,16 +78,7 @@ export async function PUT(
     }
 
     // Check if user is authenticated and is admin
-    let session;
-    try {
-      session = await getServerSession(authOptions);
-    } catch (authError) {
-      console.error('Auth session error:', authError);
-      return NextResponse.json(
-        { error: 'Authentication error' },
-        { status: 500 }
-      );
-    }
+    const session = await getSession();
 
     if (!session || !isAdmin(session)) {
       return NextResponse.json(
@@ -154,16 +155,7 @@ export async function DELETE(
     }
 
     // Check if user is authenticated and is admin
-    let session;
-    try {
-      session = await getServerSession(authOptions);
-    } catch (authError) {
-      console.error('Auth session error:', authError);
-      return NextResponse.json(
-        { error: 'Authentication error' },
-        { status: 500 }
-      );
-    }
+    const session = await getSession();
 
     if (!session || !isAdmin(session)) {
       return NextResponse.json(

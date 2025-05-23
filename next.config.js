@@ -14,11 +14,17 @@ const nextConfig = {
   experimental: {
     // This allows the app to continue building even if there are errors
     // in server components during the build process
-    serverComponentsExternalPackages: ['@prisma/client'],
+    serverComponentsExternalPackages: ['@prisma/client', 'bcryptjs', 'next-auth'],
     // Increase the timeout for server components
     serverActions: {
       bodySizeLimit: '2mb',
     },
+  },
+  // Disable static optimization for API routes
+  staticPageGenerationTimeout: 120,
+  // Increase memory limit for builds
+  compiler: {
+    removeConsole: process.env.NODE_ENV === 'production' ? { exclude: ['error', 'warn'] } : false,
   },
 };
 
