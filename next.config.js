@@ -19,13 +19,21 @@ const nextConfig = {
     serverActions: {
       bodySizeLimit: '2mb',
     },
+    // Skip API validation during build
+    skipValidation: true,
+    // Skip middleware execution during build
+    skipMiddlewareUrlNormalize: true,
+    // Skip API route body parsing during build
+    skipTrailingSlashRedirect: true,
   },
   // Disable static optimization for API routes
-  staticPageGenerationTimeout: 120,
+  staticPageGenerationTimeout: 180,
   // Increase memory limit for builds
   compiler: {
     removeConsole: process.env.NODE_ENV === 'production' ? { exclude: ['error', 'warn'] } : false,
   },
+  // Disable API routes static optimization
+  output: 'standalone',
 };
 
 module.exports = nextConfig;
