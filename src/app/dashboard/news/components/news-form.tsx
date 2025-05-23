@@ -1,20 +1,25 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { newsSchema, type NewsFormValues } from '@/lib/validations';
-import { useRouter } from 'next/navigation';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { FormField, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import Image from 'next/image';
-import { TrashIcon, PlusIcon } from '@heroicons/react/24/outline';
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { newsSchema, type NewsFormValues } from "@/lib/validations";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  FormField,
+  FormLabel,
+  FormControl,
+  FormMessage,
+} from "@/components/ui/form";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import Image from "next/image";
+import { TrashIcon } from "@heroicons/react/24/outline";
 
 interface NewsFormProps {
-  initialData?: NewsFormValues & { 
+  initialData?: NewsFormValues & {
     id: string;
     images?: { id: string; url: string }[];
   };
@@ -25,12 +30,16 @@ export function NewsForm({ initialData, isEditing = false }: NewsFormProps) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [mainImagePreview, setMainImagePreview] = useState<string | null>(initialData?.mainImage || null);
-  const [mainImageFile, setMainImageFile] = useState<File | null>(null);
-  const [additionalImages, setAdditionalImages] = useState<{ file: File; preview: string }[]>([]);
-  const [existingImages, setExistingImages] = useState<{ id: string; url: string }[]>(
-    initialData?.images || []
+  const [mainImagePreview, setMainImagePreview] = useState<string | null>(
+    initialData?.mainImage || null
   );
+  const [mainImageFile, setMainImageFile] = useState<File | null>(null);
+  const [additionalImages, setAdditionalImages] = useState<
+    { file: File; preview: string }[]
+  >([]);
+  const [existingImages, setExistingImages] = useState<
+    { id: string; url: string }[]
+  >(initialData?.images || []);
 
   const {
     register,
@@ -39,9 +48,9 @@ export function NewsForm({ initialData, isEditing = false }: NewsFormProps) {
   } = useForm<NewsFormValues>({
     resolver: zodResolver(newsSchema),
     defaultValues: initialData || {
-      title: '',
-      content: '',
-      mainImage: '',
+      title: "",
+      content: "",
+      mainImage: "",
     },
   });
 
@@ -57,22 +66,24 @@ export function NewsForm({ initialData, isEditing = false }: NewsFormProps) {
     reader.readAsDataURL(file);
   };
 
-  const handleAdditionalImagesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleAdditionalImagesChange = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
     const newImages: { file: File; preview: string }[] = [];
-    
-    Array.from(files).forEach(file => {
+
+    Array.from(files).forEach((file) => {
       const reader = new FileReader();
       reader.onload = () => {
         newImages.push({
           file,
           preview: reader.result as string,
         });
-        
+
         if (newImages.length === files.length) {
-          setAdditionalImages(prev => [...prev, ...newImages]);
+          setAdditionalImages((prev) => [...prev, ...newImages]);
         }
       };
       reader.readAsDataURL(file);
@@ -80,36 +91,40 @@ export function NewsForm({ initialData, isEditing = false }: NewsFormProps) {
   };
 
   const removeAdditionalImage = (index: number) => {
-    setAdditionalImages(prev => prev.filter((_, i) => i !== index));
+    setAdditionalImages((prev) => prev.filter((_, i) => i !== index));
   };
 
   const removeExistingImage = async (id: string) => {
     try {
       const response = await fetch(`/api/images/${id}`, {
-        method: 'DELETE',
+        method: "DELETE",
       });
-      
+
       if (!response.ok) {
-        throw new Error('Failed to delete image');
+        throw new Error("Failed to delete image");
       }
-      
-      setExistingImages(prev => prev.filter(img => img.id !== id));
-    } catch (error: any) {
-      setError(error.message || 'Failed to delete image');
+
+      setExistingImages((prev) => prev.filter((img) => img.id !== id));
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        setError(error.message || "An error occurred");
+      } else {
+        setError("An unknown error occurred");
+      }
     }
   };
 
   const uploadImage = async (file: File): Promise<string> => {
     const formData = new FormData();
-    formData.append('file', file);
+    formData.append("file", file);
 
-    const response = await fetch('/api/upload', {
-      method: 'POST',
+    const response = await fetch("/api/upload", {
+      method: "POST",
       body: formData,
     });
 
     if (!response.ok) {
-      throw new Error('Failed to upload image');
+      throw new Error("Failed to upload image");
     }
 
     const data = await response.json();
@@ -120,11 +135,11 @@ export function NewsForm({ initialData, isEditing = false }: NewsFormProps) {
     for (const image of additionalImages) {
       try {
         const imageUrl = await uploadImage(image.file);
-        
-        await fetch('/api/images', {
-          method: 'POST',
+
+        await fetch("/api/images", {
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
           body: JSON.stringify({
             url: imageUrl,
@@ -132,7 +147,7 @@ export function NewsForm({ initialData, isEditing = false }: NewsFormProps) {
           }),
         });
       } catch (error) {
-        console.error('Failed to upload additional image:', error);
+        console.error("Failed to upload additional image:", error);
       }
     }
   };
@@ -149,33 +164,37 @@ export function NewsForm({ initialData, isEditing = false }: NewsFormProps) {
       }
 
       // Create or update news
-      const url = isEditing ? `/api/news/${initialData?.id}` : '/api/news';
-      const method = isEditing ? 'PUT' : 'POST';
+      const url = isEditing ? `/api/news/${initialData?.id}` : "/api/news";
+      const method = isEditing ? "PUT" : "POST";
 
       const response = await fetch(url, {
         method,
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(data),
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to save news');
+        throw new Error(errorData.error || "Failed to save news");
       }
 
       const newsData = await response.json();
-      
+
       // Upload additional images
       if (additionalImages.length > 0) {
         await uploadAdditionalImages(newsData.id || initialData?.id);
       }
 
-      router.push('/dashboard/news');
+      router.push("/dashboard/news");
       router.refresh();
-    } catch (error: any) {
-      setError(error.message || 'An error occurred');
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        setError(error.message || "An error occurred");
+      } else {
+        setError("An unknown error occurred");
+      }
     } finally {
       setIsLoading(false);
     }
@@ -184,7 +203,7 @@ export function NewsForm({ initialData, isEditing = false }: NewsFormProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{isEditing ? 'تعديل الخبر' : 'إضافة خبر جديد'}</CardTitle>
+        <CardTitle>{isEditing ? "تعديل الخبر" : "إضافة خبر جديد"}</CardTitle>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
@@ -198,7 +217,7 @@ export function NewsForm({ initialData, isEditing = false }: NewsFormProps) {
             <FormLabel required>عنوان الخبر</FormLabel>
             <FormControl>
               <Input
-                {...register('title')}
+                {...register("title")}
                 placeholder="أدخل عنوان الخبر"
                 disabled={isLoading}
               />
@@ -210,13 +229,15 @@ export function NewsForm({ initialData, isEditing = false }: NewsFormProps) {
             <FormLabel required>محتوى الخبر</FormLabel>
             <FormControl>
               <Textarea
-                {...register('content')}
+                {...register("content")}
                 placeholder="أدخل محتوى الخبر"
                 rows={10}
                 disabled={isLoading}
               />
             </FormControl>
-            {errors.content && <FormMessage>{errors.content.message}</FormMessage>}
+            {errors.content && (
+              <FormMessage>{errors.content.message}</FormMessage>
+            )}
           </FormField>
 
           <FormField name="mainImage">
@@ -229,7 +250,7 @@ export function NewsForm({ initialData, isEditing = false }: NewsFormProps) {
                 disabled={isLoading}
               />
             </FormControl>
-            <input type="hidden" {...register('mainImage')} />
+            <input type="hidden" {...register("mainImage")} />
             {mainImagePreview && (
               <div className="mt-2 relative h-40 w-full">
                 <Image
@@ -283,7 +304,7 @@ export function NewsForm({ initialData, isEditing = false }: NewsFormProps) {
               disabled={isLoading}
               className="mt-1"
             />
-            
+
             {additionalImages.length > 0 && (
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-4">
                 {additionalImages.map((image, index) => (
@@ -313,16 +334,17 @@ export function NewsForm({ initialData, isEditing = false }: NewsFormProps) {
             <Button
               type="button"
               variant="outline"
-              onClick={() => router.push('/dashboard/news')}
+              onClick={() => router.push("/dashboard/news")}
               disabled={isLoading}
             >
               إلغاء
             </Button>
-            <Button
-              type="submit"
-              disabled={isLoading}
-            >
-              {isLoading ? 'جاري الحفظ...' : isEditing ? 'حفظ التغييرات' : 'إضافة الخبر'}
+            <Button type="submit" disabled={isLoading}>
+              {isLoading
+                ? "جاري الحفظ..."
+                : isEditing
+                ? "حفظ التغييرات"
+                : "إضافة الخبر"}
             </Button>
           </div>
         </form>

@@ -2,17 +2,35 @@ import { prisma } from '@/lib/prisma';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import Image from 'next/image';
 import Link from 'next/link';
+import { News } from '@prisma/client';
+
+// Add export const dynamic = 'force-dynamic' to prevent static prerendering
+export const dynamic = 'force-dynamic';
+
+// Define the type for news items with images
+type NewsWithImages = News & {
+  images: {
+    id: string;
+    url: string;
+  }[];
+};
 
 export default async function NewsPage() {
-  // Get all news
-  const news = await prisma.news.findMany({
-    orderBy: {
-      date: 'desc',
-    },
-    include: {
-      images: true,
-    },
-  });
+  // Get all news with error handling
+  let news: NewsWithImages[] = [];
+  try {
+    news = await prisma.news.findMany({
+      orderBy: {
+        date: 'desc',
+      },
+      include: {
+        images: true,
+      },
+    }) as NewsWithImages[];
+  } catch (error) {
+    console.error('Error fetching news:', error);
+    // Continue with empty news array
+  }
 
   // Format date function
   const formatDate = (date: Date) => {

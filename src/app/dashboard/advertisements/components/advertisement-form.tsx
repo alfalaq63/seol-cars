@@ -1,22 +1,33 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { advertisementSchema, type AdvertisementFormValues } from '@/lib/validations';
-import { useRouter } from 'next/navigation';
-import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
-import { FormField, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
+import { useState } from "react";
+import { useForm, Resolver } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  advertisementSchema,
+  type AdvertisementFormValues,
+} from "@/lib/validations";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  FormField,
+  FormLabel,
+  FormControl,
+  FormMessage,
+} from "@/components/ui/form";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 
 interface AdvertisementFormProps {
   initialData?: AdvertisementFormValues & { id: string };
   isEditing?: boolean;
 }
 
-export function AdvertisementForm({ initialData, isEditing = false }: AdvertisementFormProps) {
+export function AdvertisementForm({
+  initialData,
+  isEditing = false,
+}: AdvertisementFormProps) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -26,10 +37,12 @@ export function AdvertisementForm({ initialData, isEditing = false }: Advertisem
     handleSubmit,
     formState: { errors },
   } = useForm<AdvertisementFormValues>({
-    resolver: zodResolver(advertisementSchema),
+    resolver: zodResolver(
+      advertisementSchema
+    ) as Resolver<AdvertisementFormValues>,
     defaultValues: initialData || {
-      content: '',
-      date: new Date().toISOString().split('T')[0],
+      content: "",
+      date: new Date().toISOString().split("T")[0],
     },
   });
 
@@ -39,26 +52,32 @@ export function AdvertisementForm({ initialData, isEditing = false }: Advertisem
       setError(null);
 
       // Create or update advertisement
-      const url = isEditing ? `/api/advertisements/${initialData?.id}` : '/api/advertisements';
-      const method = isEditing ? 'PUT' : 'POST';
+      const url = isEditing
+        ? `/api/advertisements/${initialData?.id}`
+        : "/api/advertisements";
+      const method = isEditing ? "PUT" : "POST";
 
       const response = await fetch(url, {
         method,
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(data),
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to save advertisement');
+        throw new Error(errorData.error || "Failed to save advertisement");
       }
 
-      router.push('/dashboard/advertisements');
+      router.push("/dashboard/advertisements");
       router.refresh();
-    } catch (error: any) {
-      setError(error.message || 'An error occurred');
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        setError(error.message || "An error occurred");
+      } else {
+        setError("An unknown error occurred");
+      }
     } finally {
       setIsLoading(false);
     }
@@ -67,7 +86,9 @@ export function AdvertisementForm({ initialData, isEditing = false }: Advertisem
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{isEditing ? 'تعديل الإعلان' : 'إضافة إعلان جديد'}</CardTitle>
+        <CardTitle>
+          {isEditing ? "تعديل الإعلان" : "إضافة إعلان جديد"}
+        </CardTitle>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
@@ -80,11 +101,7 @@ export function AdvertisementForm({ initialData, isEditing = false }: Advertisem
           <FormField name="date">
             <FormLabel required>تاريخ الإعلان</FormLabel>
             <FormControl>
-              <Input
-                type="date"
-                {...register('date')}
-                disabled={isLoading}
-              />
+              <Input type="date" {...register("date")} disabled={isLoading} />
             </FormControl>
             {errors.date && <FormMessage>{errors.date.message}</FormMessage>}
           </FormField>
@@ -93,29 +110,32 @@ export function AdvertisementForm({ initialData, isEditing = false }: Advertisem
             <FormLabel required>محتوى الإعلان</FormLabel>
             <FormControl>
               <Textarea
-                {...register('content')}
+                {...register("content")}
                 placeholder="أدخل محتوى الإعلان"
                 rows={5}
                 disabled={isLoading}
               />
             </FormControl>
-            {errors.content && <FormMessage>{errors.content.message}</FormMessage>}
+            {errors.content && (
+              <FormMessage>{errors.content.message}</FormMessage>
+            )}
           </FormField>
 
           <div className="flex justify-end space-x-2">
             <Button
               type="button"
               variant="outline"
-              onClick={() => router.push('/dashboard/advertisements')}
+              onClick={() => router.push("/dashboard/advertisements")}
               disabled={isLoading}
             >
               إلغاء
             </Button>
-            <Button
-              type="submit"
-              disabled={isLoading}
-            >
-              {isLoading ? 'جاري الحفظ...' : isEditing ? 'حفظ التغييرات' : 'إضافة الإعلان'}
+            <Button type="submit" disabled={isLoading}>
+              {isLoading
+                ? "جاري الحفظ..."
+                : isEditing
+                ? "حفظ التغييرات"
+                : "إضافة الإعلان"}
             </Button>
           </div>
         </form>

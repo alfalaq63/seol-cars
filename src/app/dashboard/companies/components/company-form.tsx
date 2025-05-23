@@ -137,10 +137,13 @@ export function CompanyForm({ initialData, isEditing = false }: CompanyFormProps
         router.refresh();
       }, 100);
 
-    } catch (error: any) {
-      console.error('Form submission error:', error);
-      setError(error.message || 'حدث خطأ أثناء حفظ الشركة');
-    } finally {
+    } catch (error: unknown) {
+  if (error instanceof Error) {
+    setError(error.message || 'حدث خطأ عند حفظ الشركة');
+  } else {
+    setError('An unknown error occurred');
+  }
+} finally {
       setIsLoading(false);
     }
   };

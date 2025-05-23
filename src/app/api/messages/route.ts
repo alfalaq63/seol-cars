@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
     const validatedData = messageSchema.parse(body);
     
     // Create the message
-    const message = await prisma.message.create({
+    await prisma.message.create({
       data: validatedData,
     });
     
@@ -49,12 +49,12 @@ export async function POST(request: NextRequest) {
       { message: 'Message sent successfully' },
       { status: 201 }
     );
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error creating message:', error);
     
-    if (error.name === 'ZodError') {
+    if (typeof error === 'object' && error !== null && 'name' in error && error.name === 'ZodError') {
       return NextResponse.json(
-        { error: 'Validation error', details: error.errors },
+        { error: 'Validation error', details: 'errors' in error ? error.errors : 'Invalid data' },
         { status: 400 }
       );
     }
@@ -65,3 +65,9 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+
+
+
+
+
+

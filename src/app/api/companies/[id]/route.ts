@@ -65,17 +65,17 @@ export async function PUT(
     });
     
     return NextResponse.json(company);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error updating company:', error);
     
-    if (error.name === 'ZodError') {
+    if (typeof error === 'object' && error !== null && 'name' in error && error.name === 'ZodError') {
       return NextResponse.json(
-        { error: 'Validation error', details: error.errors },
+        { error: 'Validation error', details: 'errors' in error ? error.errors : 'Invalid data' },
         { status: 400 }
       );
     }
     
-    if (error.code === 'P2025') {
+    if (typeof error === 'object' && error !== null && 'code' in error && error.code === 'P2025') {
       return NextResponse.json(
         { error: 'Company not found' },
         { status: 404 }
@@ -112,10 +112,10 @@ export async function DELETE(
     });
     
     return NextResponse.json({ message: 'Company deleted successfully' });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error deleting company:', error);
     
-    if (error.code === 'P2025') {
+    if (typeof error === 'object' && error !== null && 'code' in error && error.code === 'P2025') {
       return NextResponse.json(
         { error: 'Company not found' },
         { status: 404 }
@@ -128,3 +128,8 @@ export async function DELETE(
     );
   }
 }
+
+
+
+
+

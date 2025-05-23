@@ -65,17 +65,17 @@ export async function PUT(
     });
     
     return NextResponse.json(branch);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error updating branch:', error);
     
-    if (error.name === 'ZodError') {
+    if (typeof error === 'object' && error !== null && 'name' in error && error.name === 'ZodError') {
       return NextResponse.json(
-        { error: 'Validation error', details: error.errors },
+        { error: 'Validation error', details: 'errors' in error ? error.errors : 'Invalid data' },
         { status: 400 }
       );
     }
     
-    if (error.code === 'P2025') {
+    if (typeof error === 'object' && error !== null && 'code' in error && error.code === 'P2025') {
       return NextResponse.json(
         { error: 'Branch not found' },
         { status: 404 }
@@ -112,10 +112,10 @@ export async function DELETE(
     });
     
     return NextResponse.json({ message: 'Branch deleted successfully' });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error deleting branch:', error);
     
-    if (error.code === 'P2025') {
+    if (typeof error === 'object' && error !== null && 'code' in error && error.code === 'P2025') {
       return NextResponse.json(
         { error: 'Branch not found' },
         { status: 404 }
@@ -128,3 +128,8 @@ export async function DELETE(
     );
   }
 }
+
+
+
+
+

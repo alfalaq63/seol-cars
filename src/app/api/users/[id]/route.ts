@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { userCreateSchema, userUpdateSchema } from '@/lib/validations';
+import {  userUpdateSchema } from '@/lib/validations';
 import { getServerSession } from 'next-auth';
 import { authOptions, isAdmin } from '@/lib/auth';
 import { hash } from 'bcrypt';
@@ -89,7 +89,12 @@ export async function PUT(
     }
 
     // Prepare update data
-    const updateData: any = {
+    const updateData: {
+      name: string;
+      email: string;
+      role: string;
+      password?: string;
+    } = {
       name: validatedData.name,
       email: validatedData.email,
       role: validatedData.role,
@@ -105,7 +110,14 @@ export async function PUT(
       where: {
         id: params.id,
       },
-      data: updateData,
+      data: {
+        name: validatedData.name,
+        email: validatedData.email,
+        role: validatedData.role,
+        ...(validatedData.password && validatedData.password.trim() !== '' 
+          ? { password: updateData.password } 
+          : {})
+      },
       select: {
         id: true,
         name: true,
@@ -117,17 +129,17 @@ export async function PUT(
     });
 
     return NextResponse.json(user);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error updating user:', error);
 
-    if (error.name === 'ZodError') {
+    if (typeof error === 'object' && error !== null && 'name' in error && error.name === 'ZodError') {
       return NextResponse.json(
-        { error: 'Validation error', details: error.errors },
+        { error: 'Validation error', details: 'name' in error && 'errors' in error ? error.errors : 'Invalid data' },
         { status: 400 }
       );
     }
 
-    if (error.code === 'P2025') {
+    if (typeof error === 'object' && error !== null && 'code' in error && error.code === 'P2025') {
       return NextResponse.json(
         { error: 'User not found' },
         { status: 404 }
@@ -164,10 +176,10 @@ export async function DELETE(
     });
 
     return NextResponse.json({ message: 'User deleted successfully' });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error deleting user:', error);
 
-    if (error.code === 'P2025') {
+    if (typeof error === 'object' && error !== null && 'code' in error && error.code === 'P2025') {
       return NextResponse.json(
         { error: 'User not found' },
         { status: 404 }
@@ -180,3 +192,11 @@ export async function DELETE(
     );
   }
 }
+
+
+
+
+
+
+
+

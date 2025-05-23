@@ -1,11 +1,11 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { ConfirmModal } from '@/components/ui/modal';
-import { TrashIcon, EnvelopeIcon, UserIcon } from '@heroicons/react/24/outline';
+import { useState, useEffect } from "react";
+
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { ConfirmModal } from "@/components/ui/modal";
+import { TrashIcon, UserIcon } from "@heroicons/react/24/outline";
 
 interface Message {
   id: string;
@@ -17,7 +17,6 @@ interface Message {
 }
 
 export default function MessagesPage() {
-  const router = useRouter();
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -29,45 +28,53 @@ export default function MessagesPage() {
     const fetchMessages = async () => {
       try {
         setIsLoading(true);
-        const response = await fetch('/api/messages');
-        
+        const response = await fetch("/api/messages");
+
         if (!response.ok) {
-          throw new Error('Failed to fetch messages');
+          throw new Error("Failed to fetch messages");
         }
-        
+
         const data = await response.json();
         setMessages(data);
-      } catch (error: any) {
-        setError(error.message || 'An error occurred');
+      } catch (error: unknown) {
+        if (error instanceof Error) {
+          setError(error.message || "An error occurred");
+        } else {
+          setError("An unknown error occurred");
+        }
       } finally {
         setIsLoading(false);
       }
     };
-    
+
     fetchMessages();
   }, []);
 
   const handleDelete = async () => {
     if (!messageToDelete) return;
-    
+
     try {
       const response = await fetch(`/api/messages/${messageToDelete}`, {
-        method: 'DELETE',
+        method: "DELETE",
       });
-      
+
       if (!response.ok) {
-        throw new Error('Failed to delete message');
+        throw new Error("Failed to delete message");
       }
-      
+
       // Remove the deleted message from the state
-      setMessages(messages.filter(message => message.id !== messageToDelete));
-      
+      setMessages(messages.filter((message) => message.id !== messageToDelete));
+
       // Close the modal
       setDeleteModalOpen(false);
       setMessageToDelete(null);
-    } catch (error: any) {
-      setError(error.message || 'An error occurred');
-    }
+    } catch (error: unknown) {
+  if (error instanceof Error) {
+    setError(error.message || 'An error occurred');
+  } else {
+    setError('An unknown error occurred');
+  }
+}
   };
 
   const openDeleteModal = (id: string) => {
@@ -85,12 +92,12 @@ export default function MessagesPage() {
 
   // Format date function
   const formatDate = (dateString: string) => {
-    return new Intl.DateTimeFormat('ar-LY', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: 'numeric',
-      minute: 'numeric',
+    return new Intl.DateTimeFormat("ar-LY", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      hour: "numeric",
+      minute: "numeric",
     }).format(new Date(dateString));
   };
 
@@ -132,17 +139,23 @@ export default function MessagesPage() {
                   <div>
                     <h2 className="text-lg font-bold">{message.name}</h2>
                     <p className="text-gray-500 text-sm">{message.email}</p>
-                    <p className="text-gray-400 text-xs mt-1">{formatDate(message.createdAt)}</p>
+                    <p className="text-gray-400 text-xs mt-1">
+                      {formatDate(message.createdAt)}
+                    </p>
                   </div>
                 </div>
-                
-                <div 
-                  className={`bg-gray-50 p-4 rounded-md mb-4 ${expandedMessage === message.id ? '' : 'line-clamp-3'}`}
+
+                <div
+                  className={`bg-gray-50 p-4 rounded-md mb-4 ${
+                    expandedMessage === message.id ? "" : "line-clamp-3"
+                  }`}
                   onClick={() => toggleExpandMessage(message.id)}
                 >
-                  <p className="text-gray-700 whitespace-pre-line">{message.message}</p>
+                  <p className="text-gray-700 whitespace-pre-line">
+                    {message.message}
+                  </p>
                 </div>
-                
+
                 <div className="flex justify-end">
                   <Button
                     variant="outline"

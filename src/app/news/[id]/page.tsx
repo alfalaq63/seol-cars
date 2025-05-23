@@ -3,6 +3,18 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { Button } from '@/components/ui/button';
+import { News } from '@prisma/client';
+
+// Add export const dynamic = 'force-dynamic' to prevent static prerendering
+export const dynamic = 'force-dynamic';
+
+// Define the type for news item with images
+type NewsWithImages = News & {
+  images: {
+    id: string;
+    url: string;
+  }[];
+};
 
 interface NewsDetailPageProps {
   params: {
@@ -11,15 +23,22 @@ interface NewsDetailPageProps {
 }
 
 export default async function NewsDetailPage({ params }: NewsDetailPageProps) {
-  // Get the news item
-  const news = await prisma.news.findUnique({
-    where: {
-      id: params.id,
-    },
-    include: {
-      images: true,
-    },
-  });
+  // Get the news item with error handling
+  let news: NewsWithImages | null = null;
+
+  try {
+    news = await prisma.news.findUnique({
+      where: {
+        id: params.id,
+      },
+      include: {
+        images: true,
+      },
+    }) as NewsWithImages | null;
+  } catch (error) {
+    console.error('Error fetching news item:', error);
+    notFound();
+  }
 
   // If news not found, return 404
   if (!news) {

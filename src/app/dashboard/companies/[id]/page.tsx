@@ -1,11 +1,11 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import Link from 'next/link';
-import { Button } from '@/components/ui/button';
-import { CompanyForm } from '../components/company-form';
-import { useParams } from 'next/navigation';
-import { CompanyFormValues } from '@/lib/validations';
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { CompanyForm } from "../components/company-form";
+import { useParams } from "next/navigation";
+import { CompanyFormValues } from "@/lib/validations";
 
 interface Company extends CompanyFormValues {
   id: string;
@@ -26,13 +26,17 @@ export default function EditCompanyPage() {
         const response = await fetch(`/api/companies/${id}`);
 
         if (!response.ok) {
-          throw new Error('Failed to fetch company');
+          throw new Error("فشل في جلب بيانات الشركة");
         }
 
         const data = await response.json();
         setCompany(data);
-      } catch (error: any) {
-        setError(error.message || 'An error occurred');
+      } catch (error: unknown) {
+        if (error instanceof Error) {
+          setError(error.message || "حدث خطأ");
+        } else {
+          setError("خطأ بالسيرفر");
+        }
       } finally {
         setIsLoading(false);
       }
@@ -52,7 +56,7 @@ export default function EditCompanyPage() {
   if (error || !company) {
     return (
       <div className="bg-red-50 text-red-700 p-4 rounded-md">
-        <p>{error || 'Failed to load company'}</p>
+        <p>{error || "Failed to load company"}</p>
         <Link href="/dashboard/companies" className="mt-4 inline-block">
           <Button variant="outline" size="sm">
             العودة إلى الشركات

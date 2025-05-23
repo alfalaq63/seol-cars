@@ -6,18 +6,20 @@ import { notFound } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import dynamic from 'next/dynamic';
 import { StaticMap } from '@/components/ui/static-map';
-import { use } from 'react';
+ 
+
+// Remove unused interface
 
 // Import MapDisplay only on client side
 const MapDisplay = dynamic(
   () => import('@/components/ui/map-display').then((mod) => mod.MapDisplay),
   {
     ssr: false,
-    loading: ({ latitude, longitude, height }: any) => (
+    loading: () => (
       <StaticMap
-        latitude={latitude || 32.8872}
-        longitude={longitude || 13.1913}
-        height={parseInt(height?.replace('px', '').replace('%', '')) || 400}
+        latitude={32.8872}
+        longitude={13.1913}
+        height={400}
         width={800}
         className="w-full h-full"
       />
@@ -31,12 +33,24 @@ interface BranchDetailPageProps {
   };
 }
 
-export default function BranchDetailPage({ params }: BranchDetailPageProps) {
-  // Unwrap params using React.use()
-  const unwrappedParams = use(params);
-  const branchId = unwrappedParams.id;
+interface Branch {
+  id: string;
+  name: string;
+  address: string;
+  primaryPhone: string;
+  secondaryPhone?: string;
+  latitude?: number;
+  longitude?: number;
+  company: {
+    id: string;
+    name: string;
+  };
+}
 
-  const [branch, setBranch] = useState<any>(null);
+export default function BranchDetailPage({ params }: BranchDetailPageProps) {
+  const branchId = params.id;
+
+  const [branch, setBranch] = useState<Branch | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -160,3 +174,8 @@ export default function BranchDetailPage({ params }: BranchDetailPageProps) {
     </div>
   );
 }
+
+
+
+
+

@@ -35,9 +35,13 @@ export default function EditNewsPage() {
         
         const data = await response.json();
         setNews(data);
-      } catch (error: any) {
-        setError(error.message || 'An error occurred');
-      } finally {
+      } catch (error: unknown) {
+  if (error instanceof Error) {
+    setError(error.message || 'An error occurred');
+  } else {
+    setError('An unknown error occurred');
+  }
+} finally {
         setIsLoading(false);
       }
     };

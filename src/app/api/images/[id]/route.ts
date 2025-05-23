@@ -67,17 +67,17 @@ export async function PUT(
     });
     
     return NextResponse.json(image);
-  } catch (error: any) {
+  } catch (error: Error | unknown) {
     console.error('Error updating image:', error);
     
-    if (error.name === 'ZodError') {
+    if (typeof error === 'object' && error !== null && 'name' in error && error.name === 'ZodError') {
       return NextResponse.json(
-        { error: 'Validation error', details: error.errors },
+        { error: 'Validation error', details: 'errors' in error ? error.errors : 'Invalid data' },
         { status: 400 }
       );
     }
     
-    if (error.code === 'P2025') {
+    if (typeof error === 'object' && error !== null && 'code' in error && error.code === 'P2025') {
       return NextResponse.json(
         { error: 'Image not found' },
         { status: 404 }
@@ -137,10 +137,10 @@ export async function DELETE(
     }
     
     return NextResponse.json({ message: 'Image deleted successfully' });
-  } catch (error: any) {
+  } catch (error: Error | unknown) {
     console.error('Error deleting image:', error);
     
-    if (error.code === 'P2025') {
+    if (typeof error === 'object' && error !== null && 'code' in error && error.code === 'P2025') {
       return NextResponse.json(
         { error: 'Image not found' },
         { status: 404 }
@@ -153,3 +153,8 @@ export async function DELETE(
     );
   }
 }
+
+
+
+
+

@@ -64,10 +64,11 @@ export async function DELETE(
     });
     
     return NextResponse.json({ message: 'Message deleted successfully' });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error deleting message:', error);
     
-    if (error.code === 'P2025') {
+    // Type guard to check if error is a Prisma error with code property
+    if (error && typeof error === 'object' && 'code' in error && error.code === 'P2025') {
       return NextResponse.json(
         { error: 'Message not found' },
         { status: 404 }
@@ -80,3 +81,4 @@ export async function DELETE(
     );
   }
 }
+

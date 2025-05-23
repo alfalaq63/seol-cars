@@ -89,12 +89,12 @@ export async function POST(request: NextRequest) {
     });
 
     return NextResponse.json(user, { status: 201 });
-  } catch (error: any) {
-    console.error('Error creating user:', error);
+  } catch (error: unknown) {
+  console.error('Error creating user:', error);
 
-    if (error.name === 'ZodError') {
+    if (typeof error === 'object' && error !== null && 'name' in error && error.name === 'ZodError') {
       return NextResponse.json(
-        { error: 'Validation error', details: error.errors },
+        { error: 'Validation error', details: (error as unknown as { errors: unknown[] }).errors },
         { status: 400 }
       );
     }
@@ -105,3 +105,7 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+
+
+
+

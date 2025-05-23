@@ -8,13 +8,26 @@ const globalForPrisma = global as unknown as { prisma: PrismaClient };
 
 let prisma: PrismaClient;
 
+// Function to create a new PrismaClient with error handling
+function createPrismaClient() {
+  const client = new PrismaClient({
+    log: process.env.NODE_ENV === 'development' ? ['query'] : [],
+  });
+
+  // Add error handling for connection issues
+  client.$connect().catch((err) => {
+    console.error('Failed to connect to the database:', err);
+  });
+
+  return client;
+}
+
+// Initialize PrismaClient
 if (process.env.NODE_ENV === 'production') {
-  prisma = new PrismaClient();
+  prisma = createPrismaClient();
 } else {
   if (!globalForPrisma.prisma) {
-    globalForPrisma.prisma = new PrismaClient({
-      log: ['query'],
-    });
+    globalForPrisma.prisma = createPrismaClient();
   }
   prisma = globalForPrisma.prisma;
 }

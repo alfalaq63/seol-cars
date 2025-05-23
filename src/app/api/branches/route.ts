@@ -46,12 +46,12 @@ export async function POST(request: NextRequest) {
     });
     
     return NextResponse.json(branch, { status: 201 });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error creating branch:', error);
     
-    if (error.name === 'ZodError') {
+    if (typeof error === 'object' && error !== null && 'name' in error && error.name === 'ZodError') {
       return NextResponse.json(
-        { error: 'Validation error', details: error.errors },
+        { error: 'Validation error', details: 'errors' in error ? error.errors : 'Invalid data' },
         { status: 400 }
       );
     }
@@ -62,3 +62,6 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+
+
+

@@ -58,7 +58,7 @@ export async function POST(request: NextRequest) {
       const companyData = {
         ...validatedData,
         // Ensure we have the required fields
-        id: validatedData.id || undefined, // Let Prisma generate ID if not provided
+        // Prisma will generate the ID automatically
         createdAt: new Date(),
         updatedAt: new Date(),
       };
@@ -70,21 +70,21 @@ export async function POST(request: NextRequest) {
 
       console.log('Company created successfully:', company);
       return NextResponse.json(company, { status: 201 });
-    } catch (validationError: any) {
-      if (validationError.name === 'ZodError') {
-        console.error('Validation error:', validationError.errors);
+    } catch (validationError: unknown) {
+      if (typeof validationError === 'object' && validationError !== null && 'name' in validationError && validationError.name === 'ZodError') {
+        console.error('Validation error:', (validationError as unknown as { errors: unknown[] }).errors);
         return NextResponse.json(
-          { error: 'خطأ في التحقق من صحة البيانات', details: validationError.errors },
+          { error: 'خطأ في التحقق من صحة البيانات', details: (validationError as unknown as { errors: unknown[] }).errors },
           { status: 400 }
         );
       }
       throw validationError; // Re-throw if it's not a ZodError
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error creating company:', error);
 
     // Check for Prisma-specific errors
-    if (error.code) {
+    if (typeof error === 'object' && error !== null && 'code' in error) {
       console.error('Prisma error code:', error.code);
 
       // Handle specific Prisma errors
@@ -97,8 +97,17 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json(
-      { error: 'فشل في إنشاء الشركة: ' + (error.message || 'خطأ غير معروف') },
+      { error: 'فشل في إنشاء الشركة: ' + (typeof error === 'object' && error !== null && 'message' in error ? error.message : 'خطأ غير معروف') },
       { status: 500 }
     );
   }
 }
+
+
+
+
+
+
+
+
+

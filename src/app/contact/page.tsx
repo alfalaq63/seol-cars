@@ -1,14 +1,20 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { messageSchema, type MessageFormValues } from '@/lib/validations';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Form, FormField, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { messageSchema, type MessageFormValues } from "@/lib/validations";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Form,
+  FormField,
+  FormLabel,
+  FormControl,
+  FormMessage,
+} from "@/components/ui/form";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 
 export default function ContactPage() {
   const [isLoading, setIsLoading] = useState(false);
@@ -32,23 +38,23 @@ export default function ContactPage() {
       setError(null);
       setSuccess(false);
 
-      const response = await fetch('/api/messages', {
-        method: 'POST',
+      const response = await fetch("/api/messages", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(data),
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || 'حدث خطأ أثناء إرسال الرسالة');
+        throw new Error(errorData.error || "حدث خطأ أثناء إرسال الرسالة");
       }
 
       setSuccess(true);
       reset();
-    } catch (error: any) {
-      setError(error.message || 'حدث خطأ أثناء إرسال الرسالة');
+    } catch (error: unknown) {
+      setError((error as Error).message || "حدث خطأ أثناء إرسال الرسالة");
     } finally {
       setIsLoading(false);
     }
@@ -67,25 +73,23 @@ export default function ContactPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">معلومات الاتصال</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-6">
+            معلومات الاتصال
+          </h2>
           <div className="space-y-6">
             <div>
               <h3 className="text-lg font-medium text-gray-900">العنوان</h3>
-              <p className="mt-2 text-gray-600">
-                طرابلس، ليبيا
-              </p>
+              <p className="mt-2 text-gray-600">طرابلس، ليبيا</p>
             </div>
             <div>
-              <h3 className="text-lg font-medium text-gray-900">البريد الإلكتروني</h3>
-              <p className="mt-2 text-gray-600">
-                info@siol-libya.com
-              </p>
+              <h3 className="text-lg font-medium text-gray-900">
+                البريد الإلكتروني
+              </h3>
+              <p className="mt-2 text-gray-600">info@siol-libya.com</p>
             </div>
             <div>
               <h3 className="text-lg font-medium text-gray-900">الهاتف</h3>
-              <p className="mt-2 text-gray-600">
-                +218 91 1234567
-              </p>
+              <p className="mt-2 text-gray-600">+218 91 1234567</p>
             </div>
           </div>
         </div>
@@ -96,7 +100,11 @@ export default function ContactPage() {
               <CardTitle>أرسل لنا رسالة</CardTitle>
             </CardHeader>
             <CardContent>
-              <Form form={form} onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+              <Form
+                form={form}
+                onSubmit={handleSubmit(onSubmit)}
+                className="space-y-6"
+              >
                 {success && (
                   <div className="bg-green-50 text-green-700 p-3 rounded-md text-sm">
                     تم إرسال رسالتك بنجاح. سنتواصل معك قريباً.
@@ -113,12 +121,14 @@ export default function ContactPage() {
                   <FormLabel required>الاسم</FormLabel>
                   <FormControl>
                     <Input
-                      {...register('name')}
+                      {...register("name")}
                       placeholder="أدخل اسمك"
                       disabled={isLoading}
                     />
                   </FormControl>
-                  {errors.name && <FormMessage>{errors.name.message}</FormMessage>}
+                  {errors.name && (
+                    <FormMessage>{errors.name.message}</FormMessage>
+                  )}
                 </FormField>
 
                 <FormField name="email">
@@ -126,33 +136,33 @@ export default function ContactPage() {
                   <FormControl>
                     <Input
                       type="email"
-                      {...register('email')}
+                      {...register("email")}
                       placeholder="أدخل بريدك الإلكتروني"
                       disabled={isLoading}
                     />
                   </FormControl>
-                  {errors.email && <FormMessage>{errors.email.message}</FormMessage>}
+                  {errors.email && (
+                    <FormMessage>{errors.email.message}</FormMessage>
+                  )}
                 </FormField>
 
                 <FormField name="message">
                   <FormLabel required>الرسالة</FormLabel>
                   <FormControl>
                     <Textarea
-                      {...register('message')}
+                      {...register("message")}
                       placeholder="أدخل رسالتك"
                       rows={5}
                       disabled={isLoading}
                     />
                   </FormControl>
-                  {errors.message && <FormMessage>{errors.message.message}</FormMessage>}
+                  {errors.message && (
+                    <FormMessage>{errors.message.message}</FormMessage>
+                  )}
                 </FormField>
 
-                <Button
-                  type="submit"
-                  className="w-full"
-                  disabled={isLoading}
-                >
-                  {isLoading ? 'جاري الإرسال...' : 'إرسال'}
+                <Button type="submit" className="w-full" disabled={isLoading}>
+                  {isLoading ? "جاري الإرسال..." : "إرسال"}
                 </Button>
               </Form>
             </CardContent>

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+ 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { ConfirmModal } from '@/components/ui/modal';
@@ -24,7 +24,7 @@ interface News {
 }
 
 export default function NewsPage() {
-  const router = useRouter();
+   
   const [news, setNews] = useState<News[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -43,9 +43,13 @@ export default function NewsPage() {
 
         const data = await response.json();
         setNews(data);
-      } catch (error: any) {
-        setError(error.message || 'An error occurred');
-      } finally {
+      } catch (error: unknown) {
+  if (error instanceof Error) {
+    setError(error.message || 'An error occurred');
+  } else {
+    setError('An unknown error occurred');
+  }
+}finally {
         setIsLoading(false);
       }
     };
@@ -71,9 +75,13 @@ export default function NewsPage() {
       // Close the modal
       setDeleteModalOpen(false);
       setNewsToDelete(null);
-    } catch (error: any) {
-      setError(error.message || 'An error occurred');
-    }
+    } catch (error: unknown) {
+  if (error instanceof Error) {
+    setError(error.message || 'An error occurred');
+  } else {
+    setError('An unknown error occurred');
+  }
+}
   };
 
   const openDeleteModal = (id: string) => {

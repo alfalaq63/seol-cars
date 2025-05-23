@@ -1,12 +1,11 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import Link from 'next/link';
-import { Button } from '@/components/ui/button';
-import { AdvertisementForm } from '../components/advertisement-form';
-import { useParams } from 'next/navigation';
-import { AdvertisementFormValues } from '@/lib/validations';
-import { use } from 'react';
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { AdvertisementForm } from "../components/advertisement-form";
+import { useParams } from "next/navigation";
+import { AdvertisementFormValues } from "@/lib/validations";
 
 interface Advertisement extends AdvertisementFormValues {
   id: string;
@@ -14,10 +13,11 @@ interface Advertisement extends AdvertisementFormValues {
 
 export default function EditAdvertisementPage() {
   const params = useParams();
-  const unwrappedParams = use(params);
-  const id = unwrappedParams.id as string;
+  const id = params.id as string;
 
-  const [advertisement, setAdvertisement] = useState<Advertisement | null>(null);
+  const [advertisement, setAdvertisement] = useState<Advertisement | null>(
+    null
+  );
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -28,13 +28,17 @@ export default function EditAdvertisementPage() {
         const response = await fetch(`/api/advertisements/${id}`);
 
         if (!response.ok) {
-          throw new Error('Failed to fetch advertisement');
+          throw new Error("Failed to fetch advertisement");
         }
 
         const data = await response.json();
         setAdvertisement(data);
-      } catch (error: any) {
-        setError(error.message || 'An error occurred');
+      } catch (error: unknown) {
+        if (error instanceof Error) {
+          setError(error.message || "An error occurred");
+        } else {
+          setError("An unknown error occurred");
+        }
       } finally {
         setIsLoading(false);
       }
@@ -54,7 +58,7 @@ export default function EditAdvertisementPage() {
   if (error || !advertisement) {
     return (
       <div className="bg-red-50 text-red-700 p-4 rounded-md">
-        <p>{error || 'Failed to load advertisement'}</p>
+        <p>{error || "Failed to load advertisement"}</p>
         <Link href="/dashboard/advertisements" className="mt-4 inline-block">
           <Button variant="outline" size="sm">
             العودة إلى الاعلانات
