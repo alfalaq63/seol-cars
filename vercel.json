@@ -10,6 +10,7 @@
     }
   ],
   "env": {
-    "PRISMA_SKIP_POSTINSTALL_GENERATE": "true"
+    "PRISMA_SKIP_POSTINSTALL_GENERATE": "true",
+    "PRISMA_MIGRATE_SKIP": "true"
   }
 }

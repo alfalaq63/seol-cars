@@ -16,7 +16,7 @@
     "db:setup": "ts-node src/scripts/setup-db.ts",
     "create:admin": "tsx src/scripts/create-admin.ts",
     "postinstall": "prisma generate",
-    "vercel-build": "prisma generate && prisma migrate deploy && prisma db seed && next build",
+    "vercel-build": "prisma generate && prisma db push --accept-data-loss && next build",
     "seed": "ts-node prisma/seed.ts"
   },
   "dependencies": {
