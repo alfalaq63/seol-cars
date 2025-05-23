@@ -4,16 +4,36 @@ import { advertisementSchema } from '@/lib/validations';
 import { getServerSession } from 'next-auth';
 import { authOptions, isAdmin } from '@/lib/auth';
 
+// Add error handling for database connection
+const handleDatabaseError = (error: any) => {
+  console.error('Database error:', error);
+  return NextResponse.json(
+    { error: 'Database connection error' },
+    { status: 500 }
+  );
+};
+
 // GET a specific advertisement
 export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
+    // Add validation for params.id
+    if (!params.id || typeof params.id !== 'string') {
+      return NextResponse.json(
+        { error: 'Invalid advertisement ID' },
+        { status: 400 }
+      );
+    }
+
     const advertisement = await prisma.advertisement.findUnique({
       where: {
         id: params.id,
       },
+    }).catch((error) => {
+      console.error('Database query error:', error);
+      return null;
     });
 
     if (!advertisement) {
@@ -39,8 +59,26 @@ export async function PUT(
   { params }: { params: { id: string } }
 ) {
   try {
+    // Add validation for params.id
+    if (!params.id || typeof params.id !== 'string') {
+      return NextResponse.json(
+        { error: 'Invalid advertisement ID' },
+        { status: 400 }
+      );
+    }
+
     // Check if user is authenticated and is admin
-    const session = await getServerSession(authOptions);
+    let session;
+    try {
+      session = await getServerSession(authOptions);
+    } catch (authError) {
+      console.error('Auth session error:', authError);
+      return NextResponse.json(
+        { error: 'Authentication error' },
+        { status: 500 }
+      );
+    }
+
     if (!session || !isAdmin(session)) {
       return NextResponse.json(
         { error: 'Unauthorized' },
@@ -48,40 +86,52 @@ export async function PUT(
       );
     }
 
-    const body = await request.json();
-
-    // Validate the request body
-    const validatedData = advertisementSchema.parse(body);
-
-    // Update the advertisement
-    const advertisement = await prisma.advertisement.update({
-      where: {
-        id: params.id,
-      },
-      data: {
-        content: validatedData.content,
-        date: validatedData.date ? new Date(validatedData.date) : new Date(),
-      },
-    });
-
-    return NextResponse.json(advertisement);
-  } catch (error: unknown) {
-    console.error('Error updating advertisement:', error);
-
-    if (typeof error === 'object' && error !== null && 'name' in error && error.name === 'ZodError') {
+    let body;
+    try {
+      body = await request.json();
+    } catch (jsonError) {
       return NextResponse.json(
-        { error: 'Validation error', details: 'errors' in error ? error.errors : 'Invalid data' },
+        { error: 'Invalid JSON in request body' },
         { status: 400 }
       );
     }
 
-    if (typeof error === 'object' && error !== null && 'code' in error && error.code === 'P2025') {
+    // Validate the request body
+    let validatedData;
+    try {
+      validatedData = advertisementSchema.parse(body);
+    } catch (zodError) {
       return NextResponse.json(
-        { error: 'Advertisement not found' },
-        { status: 404 }
+        { error: 'Validation error', details: zodError },
+        { status: 400 }
       );
     }
 
+    // Update the advertisement
+    let advertisement;
+    try {
+      advertisement = await prisma.advertisement.update({
+        where: {
+          id: params.id,
+        },
+        data: {
+          content: validatedData.content,
+          date: validatedData.date ? new Date(validatedData.date) : new Date(),
+        },
+      });
+    } catch (dbError: any) {
+      if (dbError.code === 'P2025') {
+        return NextResponse.json(
+          { error: 'Advertisement not found' },
+          { status: 404 }
+        );
+      }
+      return handleDatabaseError(dbError);
+    }
+
+    return NextResponse.json(advertisement);
+  } catch (error: unknown) {
+    console.error('Error updating advertisement:', error);
     return NextResponse.json(
       { error: 'Failed to update advertisement' },
       { status: 500 }
@@ -95,8 +145,26 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
+    // Add validation for params.id
+    if (!params.id || typeof params.id !== 'string') {
+      return NextResponse.json(
+        { error: 'Invalid advertisement ID' },
+        { status: 400 }
+      );
+    }
+
     // Check if user is authenticated and is admin
-    const session = await getServerSession(authOptions);
+    let session;
+    try {
+      session = await getServerSession(authOptions);
+    } catch (authError) {
+      console.error('Auth session error:', authError);
+      return NextResponse.json(
+        { error: 'Authentication error' },
+        { status: 500 }
+      );
+    }
+
     if (!session || !isAdmin(session)) {
       return NextResponse.json(
         { error: 'Unauthorized' },
@@ -105,23 +173,25 @@ export async function DELETE(
     }
 
     // Delete the advertisement
-    await prisma.advertisement.delete({
-      where: {
-        id: params.id,
-      },
-    });
+    try {
+      await prisma.advertisement.delete({
+        where: {
+          id: params.id,
+        },
+      });
+    } catch (dbError: any) {
+      if (dbError.code === 'P2025') {
+        return NextResponse.json(
+          { error: 'Advertisement not found' },
+          { status: 404 }
+        );
+      }
+      return handleDatabaseError(dbError);
+    }
 
     return NextResponse.json({ message: 'Advertisement deleted successfully' });
   } catch (error: unknown) {
     console.error('Error deleting advertisement:', error);
-
-    if (typeof error === 'object' && error !== null && 'code' in error && error.code === 'P2025') {
-      return NextResponse.json(
-        { error: 'Advertisement not found' },
-        { status: 404 }
-      );
-    }
-
     return NextResponse.json(
       { error: 'Failed to delete advertisement' },
       { status: 500 }
