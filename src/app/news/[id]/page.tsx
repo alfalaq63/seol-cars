@@ -1,5 +1,4 @@
 import { prisma } from '@/lib/prisma';
-import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { Button } from '@/components/ui/button';
@@ -75,12 +74,15 @@ export default async function NewsDetailPage({ params }: NewsDetailPageProps) {
         </header>
 
         {news.mainImage && (
-          <div className="relative h-96 w-full mb-8">
-            <Image
+          <div className="relative h-96 w-full mb-8 flex items-center justify-center bg-gray-100 rounded-lg">
+            <img
               src={news.mainImage}
               alt={news.title}
-              fill
-              className="object-cover rounded-lg"
+              className="max-h-full max-w-full object-contain rounded-lg"
+              onError={(e) => {
+                console.error('Error loading main image:', news.mainImage);
+                e.currentTarget.style.display = 'none';
+              }}
             />
           </div>
         )}
@@ -98,12 +100,15 @@ export default async function NewsDetailPage({ params }: NewsDetailPageProps) {
             <h2 className="text-2xl font-bold text-gray-900 mb-4">صور إضافية</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
               {news.images.map((image) => (
-                <div key={image.id} className="relative h-48 w-full">
-                  <Image
+                <div key={image.id} className="relative h-48 w-full bg-gray-100 rounded-lg flex items-center justify-center">
+                  <img
                     src={image.url}
                     alt={news.title}
-                    fill
-                    className="object-cover rounded-lg"
+                    className="max-h-full max-w-full object-contain rounded-lg"
+                    onError={(e) => {
+                      console.error('Error loading additional image:', image.url);
+                      e.currentTarget.style.display = 'none';
+                    }}
                   />
                 </div>
               ))}

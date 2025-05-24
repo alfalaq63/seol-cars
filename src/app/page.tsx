@@ -1,11 +1,10 @@
 import { prisma } from '@/lib/prisma';
 import { Card, CardContent } from '@/components/ui/card';
-import Image from "next/image";
 import Link from "next/link";
 import BnokForm from '@/components/BnokForm';
 export default async function HomePage() {
   // Get companies for the home page with error handling
-  let companies = [];
+  let companies: any[] = [];
   try {
     companies = await prisma.company.findMany();
   } catch (error) {
@@ -35,7 +34,7 @@ export default async function HomePage() {
             شركاتنا
           </h2>
           <p className="mt-3 max-w-2xl mx-auto text-xl text-gray-500 sm:mt-4">
-            تعرف على شركاتنا المتخصصة في مجال السيارات
+            تعرف على شركاتنا المتخصصة في المجال المحدد لكل شركة
           </p>
         </div>
 
@@ -46,13 +45,14 @@ export default async function HomePage() {
                 <div className="h-36 w-full relative bg-white">
                   {company.logoUrl ? (
                     <div className="relative h-full w-full flex items-center justify-center p-2">
-                      <Image
+                      <img
                         src={company.logoUrl}
                         alt={company.name}
-                        width={120}
-                        height={120}
-                        className="object-contain max-h-32"
-                        style={{ objectFit: 'contain' }}
+                        className="max-h-32 max-w-full object-contain"
+                        onError={(e) => {
+                          console.error('Error loading company logo:', company.logoUrl);
+                          e.currentTarget.style.display = 'none';
+                        }}
                       />
                     </div>
                   ) : (

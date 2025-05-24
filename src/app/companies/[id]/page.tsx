@@ -196,12 +196,17 @@ export default function CompanyDetailPage({ params }: CompanyDetailPageProps) {
           <div className="bg-white shadow-md rounded-lg overflow-hidden">
             <div className="h-64 w-full relative">
               {company.logoUrl ? (
-                <Image
-                  src={company.logoUrl}
-                  alt={company.name}
-                  fill
-                  className="object-contain"
-                />
+                <div className="h-full w-full flex items-center justify-center p-4">
+                  <img
+                    src={company.logoUrl}
+                    alt={company.name}
+                    className="max-h-full max-w-full object-contain"
+                    onError={(e) => {
+                      console.error('Error loading image:', company.logoUrl);
+                      e.currentTarget.style.display = 'none';
+                    }}
+                  />
+                </div>
               ) : (
                 <div className="h-full w-full bg-gray-200 flex items-center justify-center">
                   <span className="text-gray-500">لا يوجد شعار</span>

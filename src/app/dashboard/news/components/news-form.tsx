@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/form";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ImageUpload } from "@/components/ui/image-upload";
-import { TrashIcon } from "@heroicons/react/24/outline";
+import { MultipleImageUpload } from "@/components/ui/multiple-image-upload";
 
 interface NewsFormProps {
   initialData?: NewsFormValues & {
@@ -33,12 +33,7 @@ export function NewsForm({ initialData, isEditing = false }: NewsFormProps) {
   const [mainImageUrl, setMainImageUrl] = useState<string>(
     initialData?.mainImage || ""
   );
-  const [additionalImages, setAdditionalImages] = useState<
-    { file: File; preview: string }[]
-  >([]);
-  const [existingImages, setExistingImages] = useState<
-    { id: string; url: string }[]
-  >(initialData?.images || []);
+  const [additionalImageUrls, setAdditionalImageUrls] = useState<string[]>([]);
 
   const {
     register,
@@ -55,91 +50,7 @@ export function NewsForm({ initialData, isEditing = false }: NewsFormProps) {
 
 
 
-  const handleAdditionalImagesChange = (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    const files = e.target.files;
-    if (!files || files.length === 0) return;
 
-    const newImages: { file: File; preview: string }[] = [];
-
-    Array.from(files).forEach((file) => {
-      const reader = new FileReader();
-      reader.onload = () => {
-        newImages.push({
-          file,
-          preview: reader.result as string,
-        });
-
-        if (newImages.length === files.length) {
-          setAdditionalImages((prev) => [...prev, ...newImages]);
-        }
-      };
-      reader.readAsDataURL(file);
-    });
-  };
-
-  const removeAdditionalImage = (index: number) => {
-    setAdditionalImages((prev) => prev.filter((_, i) => i !== index));
-  };
-
-  const removeExistingImage = async (id: string) => {
-    try {
-      const response = await fetch(`/api/images/${id}`, {
-        method: "DELETE",
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to delete image");
-      }
-
-      setExistingImages((prev) => prev.filter((img) => img.id !== id));
-    } catch (error: unknown) {
-      if (error instanceof Error) {
-        setError(error.message || "An error occurred");
-      } else {
-        setError("An unknown error occurred");
-      }
-    }
-  };
-
-  const uploadImage = async (file: File): Promise<string> => {
-    const formData = new FormData();
-    formData.append("file", file);
-
-    const response = await fetch("/api/upload", {
-      method: "POST",
-      body: formData,
-    });
-
-    if (!response.ok) {
-      throw new Error("Failed to upload image");
-    }
-
-    const data = await response.json();
-    return data.url;
-  };
-
-  const uploadAdditionalImages = async (newsId: string) => {
-    for (const image of additionalImages) {
-      try {
-        const imageUrl = await uploadImage(image.file);
-
-        await fetch("/api/images", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            url: imageUrl,
-            newsId,
-          }),
-        });
-      } catch (error) {
-        console.error("Failed to upload additional image:", error);
-      }
-    }
-  };
 
   const onSubmit = async (data: NewsFormValues) => {
     try {
@@ -168,9 +79,24 @@ export function NewsForm({ initialData, isEditing = false }: NewsFormProps) {
 
       const newsData = await response.json();
 
-      // Upload additional images
-      if (additionalImages.length > 0) {
-        await uploadAdditionalImages(newsData.id || initialData?.id);
+      // Save additional images
+      if (additionalImageUrls.length > 0) {
+        for (const imageUrl of additionalImageUrls) {
+          try {
+            await fetch("/api/images", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                url: imageUrl,
+                newsId: newsData.id || initialData?.id,
+              }),
+            });
+          } catch (error) {
+            console.error("Failed to save additional image:", error);
+          }
+        }
       }
 
       router.push("/dashboard/news");
@@ -239,71 +165,17 @@ export function NewsForm({ initialData, isEditing = false }: NewsFormProps) {
             <input type="hidden" {...register("mainImage")} value={mainImageUrl} />
           </FormField>
 
-          {isEditing && (
-            <div>
-              <FormLabel>الصور الإضافية الحالية</FormLabel>
-              {existingImages.length > 0 ? (
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-2">
-                  {existingImages.map((image) => (
-                    <div key={image.id} className="relative group">
-                      <div className="relative h-32 w-full">
-                        <Image
-                          src={image.url}
-                          alt="Additional image"
-                          fill
-                          className="object-cover rounded-md"
-                        />
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => removeExistingImage(image.id)}
-                        className="absolute top-2 right-2 bg-red-600 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-                      >
-                        <TrashIcon className="h-4 w-4" />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-gray-500 text-sm mt-2">لا توجد صور إضافية</p>
-              )}
-            </div>
-          )}
-
           <div>
-            <FormLabel>إضافة صور جديدة</FormLabel>
-            <Input
-              type="file"
-              accept="image/*"
-              multiple
-              onChange={handleAdditionalImagesChange}
-              disabled={isLoading}
-              className="mt-1"
-            />
-
-            {additionalImages.length > 0 && (
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-4">
-                {additionalImages.map((image, index) => (
-                  <div key={index} className="relative group">
-                    <div className="relative h-32 w-full">
-                      <Image
-                        src={image.preview}
-                        alt={`Additional image ${index + 1}`}
-                        fill
-                        className="object-cover rounded-md"
-                      />
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => removeAdditionalImage(index)}
-                      className="absolute top-2 right-2 bg-red-600 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-                    >
-                      <TrashIcon className="h-4 w-4" />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
+            <FormLabel>الصور الإضافية</FormLabel>
+            <FormControl>
+              <MultipleImageUpload
+                value={additionalImageUrls}
+                onChange={setAdditionalImageUrls}
+                disabled={isLoading}
+                maxImages={5}
+                maxSize={2}
+              />
+            </FormControl>
           </div>
 
           <div className="flex justify-end space-x-2">
