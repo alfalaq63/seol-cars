@@ -5,8 +5,8 @@ import { Navbar } from '@/components/layout/navbar';
 import { Footer } from '@/components/layout/footer';
 import { Providers } from './providers';
 import { AdvertisementsTicker } from '@/components/advertisements-ticker';
-// Import the app initialization file
-import '@/lib/app-init';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -23,17 +23,19 @@ export const metadata: Metadata = {
   description: "موقع شركة سيول ليبيا للسيارات",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const session = await getServerSession(authOptions);
+
   return (
     <html lang="ar" dir="rtl">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <Providers>
+        <Providers session={session}>
           <div className="flex flex-col min-h-screen">
             <Navbar />
             <main className="flex-grow pb-24">{children}</main>

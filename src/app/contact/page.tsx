@@ -16,8 +16,7 @@ import {
 } from "@/components/ui/form";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 
-// Force dynamic rendering
-export const dynamic = 'force-dynamic';
+
 
 export default function ContactPage() {
   const [isLoading, setIsLoading] = useState(false);

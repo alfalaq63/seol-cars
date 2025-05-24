@@ -7,7 +7,7 @@ const nextConfig = {
     ignoreBuildErrors: true,
   },
   // External packages for server components
-  serverExternalPackages: ['@prisma/client', 'bcryptjs', 'next-auth'],
+  serverExternalPackages: ['@prisma/client', 'bcryptjs'],
   // Image optimization
   images: {
     remotePatterns: [
@@ -20,12 +20,6 @@ const nextConfig = {
         hostname: 'localhost',
       },
     ],
-  },
-  // Disable static optimization completely
-  output: 'standalone',
-  // Experimental features for better compatibility
-  experimental: {
-    missingSuspenseWithCSRBailout: false,
   },
 };
 
