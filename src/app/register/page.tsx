@@ -10,6 +10,9 @@ import { Input } from '@/components/ui/input';
 import { Form, FormField, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
 export default function RegisterPage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);

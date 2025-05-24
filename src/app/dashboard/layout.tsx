@@ -4,6 +4,9 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import Link from 'next/link';
 
+// Force dynamic rendering for authentication
+export const dynamic = 'force-dynamic';
+
 export default async function DashboardLayout({
   children,
 }: {

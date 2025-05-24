@@ -7,17 +7,18 @@ async function main() {
   try {
     console.log('Starting database setup...');
 
-    // Create database tables
-    console.log('Creating database tables...');
-    await prisma.$executeRaw`CREATE DATABASE IF NOT EXISTS siol_libya_cars`;
-    
-    // Run migrations
-    console.log('Running migrations...');
-    // This is handled by Prisma migrate
+    // Test database connection
+    console.log('Testing database connection...');
+    await prisma.$connect();
+    console.log('Database connection successful!');
+
+    // Note: Database creation is handled by the hosting provider
+    // For PostgreSQL, we don't need to create the database manually
 
     console.log('Database setup completed successfully!');
   } catch (error) {
     console.error('Error setting up database:', error);
+    console.error('Make sure your DATABASE_URL is correctly configured');
     process.exit(1);
   } finally {
     await prisma.$disconnect();

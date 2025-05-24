@@ -4,8 +4,15 @@ import Image from "next/image";
 import Link from "next/link";
 import BnokForm from '@/components/BnokForm';
 export default async function HomePage() {
-  // Get companies for the home page
-  const companies = await prisma.company.findMany();
+  // Get companies for the home page with error handling
+  let companies = [];
+  try {
+    companies = await prisma.company.findMany();
+  } catch (error) {
+    console.error('Error fetching companies:', error);
+    // Return empty array if database is not available during build
+    companies = [];
+  }
 
   return (
     <div>
