@@ -7,6 +7,9 @@ import { BranchForm } from '../components/branch-form';
 import { useParams } from 'next/navigation';
 import { BranchFormValues } from '@/lib/validations';
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
 interface Branch extends BranchFormValues {
   id: string;
 }

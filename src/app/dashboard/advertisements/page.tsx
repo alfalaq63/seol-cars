@@ -12,6 +12,9 @@ import {
   CalendarIcon,
 } from "@heroicons/react/24/outline";
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
 interface Advertisement {
   id: string;
   content: string;

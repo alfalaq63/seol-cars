@@ -2,12 +2,15 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
- 
+
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { ConfirmModal } from '@/components/ui/modal';
 import { PencilIcon, TrashIcon, CalendarIcon, PhotoIcon } from '@heroicons/react/24/outline';
 import Image from 'next/image';
+
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
 
 interface News {
   id: string;
@@ -24,7 +27,7 @@ interface News {
 }
 
 export default function NewsPage() {
-   
+
   const [news, setNews] = useState<News[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

@@ -7,6 +7,9 @@ import { CompanyForm } from "../components/company-form";
 import { useParams } from "next/navigation";
 import { CompanyFormValues } from "@/lib/validations";
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
 interface Company extends CompanyFormValues {
   id: string;
 }

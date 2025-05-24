@@ -9,12 +9,15 @@ import { Button } from '@/components/ui/button';
 import dynamic from 'next/dynamic';
 import { StaticMap } from '@/components/ui/static-map';
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
 // Import MapDisplay only on client side
 const MapDisplay = dynamic(
   () => import('@/components/ui/map-display').then((mod) => mod.MapDisplay),
   {
     ssr: false,
-   
+
    loading: () => (
   <StaticMap
     latitude={32.8872}

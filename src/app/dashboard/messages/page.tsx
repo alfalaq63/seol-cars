@@ -7,6 +7,9 @@ import { Card, CardContent } from "@/components/ui/card";
 import { ConfirmModal } from "@/components/ui/modal";
 import { TrashIcon, UserIcon } from "@heroicons/react/24/outline";
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
 interface Message {
   id: string;
   name: string;

@@ -8,6 +8,9 @@ import { Card, CardContent } from '@/components/ui/card';
 import { ConfirmModal } from '@/components/ui/modal';
 import { PencilIcon, TrashIcon, UserIcon } from '@heroicons/react/24/outline';
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
 interface User {
   id: string;
   name: string;
@@ -30,11 +33,11 @@ export default function UsersPage() {
       try {
         setIsLoading(true);
         const response = await fetch('/api/users');
-        
+
         if (!response.ok) {
           throw new Error('Failed to fetch users');
         }
-        
+
         const data = await response.json();
         setUsers(data);
       } catch (error: any) {
@@ -43,25 +46,25 @@ export default function UsersPage() {
         setIsLoading(false);
       }
     };
-    
+
     fetchUsers();
   }, []);
 
   const handleDelete = async () => {
     if (!userToDelete) return;
-    
+
     try {
       const response = await fetch(`/api/users/${userToDelete}`, {
         method: 'DELETE',
       });
-      
+
       if (!response.ok) {
         throw new Error('Failed to delete user');
       }
-      
+
       // Remove the deleted user from the state
       setUsers(users.filter(user => user.id !== userToDelete));
-      
+
       // Close the modal
       setDeleteModalOpen(false);
       setUserToDelete(null);
@@ -121,7 +124,7 @@ export default function UsersPage() {
                     <p className="text-gray-500 text-sm">{user.email}</p>
                   </div>
                 </div>
-                
+
                 <div className="flex items-center mb-4">
                   <span className={`px-2 py-1 text-xs rounded-full ${
                     user.role === 'ADMIN' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
@@ -129,7 +132,7 @@ export default function UsersPage() {
                     {user.role === 'ADMIN' ? 'مدير' : 'مستخدم'}
                   </span>
                 </div>
-                
+
                 <div className="flex justify-end space-x-2">
                   <Button
                     variant="outline"

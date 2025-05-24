@@ -6,7 +6,10 @@ import { notFound } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import dynamic from 'next/dynamic';
 import { StaticMap } from '@/components/ui/static-map';
- 
+
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
 
 // Remove unused interface
 

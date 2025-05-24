@@ -7,6 +7,9 @@ import { NewsForm } from '../components/news-form';
 import { useParams } from 'next/navigation';
 import { NewsFormValues } from '@/lib/validations';
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
 interface News extends NewsFormValues {
   id: string;
   images: {
@@ -18,7 +21,7 @@ interface News extends NewsFormValues {
 export default function EditNewsPage() {
   const params = useParams();
   const id = params.id as string;
-  
+
   const [news, setNews] = useState<News | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -28,11 +31,11 @@ export default function EditNewsPage() {
       try {
         setIsLoading(true);
         const response = await fetch(`/api/news/${id}`);
-        
+
         if (!response.ok) {
           throw new Error('Failed to fetch news');
         }
-        
+
         const data = await response.json();
         setNews(data);
       } catch (error: unknown) {
@@ -45,7 +48,7 @@ export default function EditNewsPage() {
         setIsLoading(false);
       }
     };
-    
+
     fetchNews();
   }, [id]);
 

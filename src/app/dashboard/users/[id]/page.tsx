@@ -7,6 +7,9 @@ import { UserForm } from '../components/user-form';
 import { useParams } from 'next/navigation';
 import { UserFormValues } from '@/lib/validations';
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
 interface User extends Omit<UserFormValues, 'password'> {
   id: string;
 }
@@ -14,7 +17,7 @@ interface User extends Omit<UserFormValues, 'password'> {
 export default function EditUserPage() {
   const params = useParams();
   const id = params.id as string;
-  
+
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -24,11 +27,11 @@ export default function EditUserPage() {
       try {
         setIsLoading(true);
         const response = await fetch(`/api/users/${id}`);
-        
+
         if (!response.ok) {
           throw new Error('Failed to fetch user');
         }
-        
+
         const data = await response.json();
         setUser(data);
       } catch (error: any) {
@@ -37,7 +40,7 @@ export default function EditUserPage() {
         setIsLoading(false);
       }
     };
-    
+
     fetchUser();
   }, [id]);
 
