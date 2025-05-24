@@ -1,6 +1,9 @@
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
 export default function NotFound() {
   return (
     <div className="flex flex-col items-center justify-center min-h-[calc(100vh-200px)] py-12 px-4 sm:px-6 lg:px-8">

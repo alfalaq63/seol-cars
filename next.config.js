@@ -21,10 +21,12 @@ const nextConfig = {
       },
     ],
   },
-  // Disable problematic optimizations
-  swcMinify: false,
-  // Disable static optimization
-  trailingSlash: false,
+  // Disable static optimization completely
+  output: 'standalone',
+  // Experimental features for better compatibility
+  experimental: {
+    missingSuspenseWithCSRBailout: false,
+  },
 };
 
 module.exports = nextConfig;
