@@ -16,6 +16,7 @@
     "db:studio": "prisma studio",
     "db:setup": "ts-node src/scripts/setup-db.ts",
     "create:admin": "tsx src/scripts/create-admin.ts",
+    "setup:production": "tsx src/scripts/setup-production-db.ts",
     "postinstall": "prisma generate",
     "seed": "ts-node prisma/seed.ts"
   },

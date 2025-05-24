@@ -52,8 +52,14 @@
 
 ## Step 3: Set Up Database Schema
 
-After successful deployment:
+After successful deployment, you have two options:
 
+### Option A: Using Web Interface (Recommended)
+1. **Visit Setup Page**: Go to `https://your-app-name.vercel.app/setup`
+2. **Click Setup Button**: This will create database tables and admin user
+3. **Login**: Use the provided credentials
+
+### Option B: Using Command Line
 1. **Push Database Schema**:
    ```bash
    npx prisma db push
