@@ -11,7 +11,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { FormField, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { MapPickerNew } from '@/components/ui/map-picker-new';
-import Image from 'next/image';
+import { ImageUpload } from '@/components/ui/image-upload';
 
 interface CompanyFormProps {
   initialData?: CompanyFormValues & { id: string };
@@ -22,8 +22,7 @@ export function CompanyForm({ initialData, isEditing = false }: CompanyFormProps
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [logoPreview, setLogoPreview] = useState<string | null>(initialData?.logoUrl || null);
-  const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [logoUrl, setLogoUrl] = useState<string>(initialData?.logoUrl || '');
   const [coordinates, setCoordinates] = useState<{latitude: number | null, longitude: number | null}>({
     latitude: initialData?.latitude || null,
     longitude: initialData?.longitude || null,
@@ -45,36 +44,7 @@ export function CompanyForm({ initialData, isEditing = false }: CompanyFormProps
     },
   });
 
-  const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
 
-    setLogoFile(file);
-    const reader = new FileReader();
-    reader.onload = () => {
-      setLogoPreview(reader.result as string);
-    };
-    reader.readAsDataURL(file);
-  };
-
-  const uploadLogo = async (): Promise<string> => {
-    if (!logoFile) return initialData?.logoUrl || '';
-
-    const formData = new FormData();
-    formData.append('file', logoFile);
-
-    const response = await fetch('/api/upload', {
-      method: 'POST',
-      body: formData,
-    });
-
-    if (!response.ok) {
-      throw new Error('Failed to upload logo');
-    }
-
-    const data = await response.json();
-    return data.url;
-  };
 
   const onSubmit = async (data: CompanyFormValues) => {
     try {
@@ -84,19 +54,8 @@ export function CompanyForm({ initialData, isEditing = false }: CompanyFormProps
       // Prepare data for submission
       const formData = { ...data };
 
-      // Upload logo if changed
-      if (logoFile) {
-        try {
-          const logoUrl = await uploadLogo();
-          formData.logoUrl = logoUrl;
-        } catch (uploadError) {
-          console.error('Logo upload error:', uploadError);
-          throw new Error('فشل في رفع الشعار. الرجاء المحاولة مرة أخرى.');
-        }
-      } else if (!isEditing) {
-        // Set empty string for logoUrl if not provided
-        formData.logoUrl = '';
-      }
+      // Set logo URL
+      formData.logoUrl = logoUrl;
 
       // Add coordinates to data
       if (coordinates.latitude !== null && coordinates.longitude !== null) {
@@ -261,24 +220,14 @@ export function CompanyForm({ initialData, isEditing = false }: CompanyFormProps
           <FormField name="logoUrl">
             <FormLabel>شعار الشركة</FormLabel>
             <FormControl>
-              <Input
-                type="file"
-                accept="image/*"
-                onChange={handleLogoChange}
+              <ImageUpload
+                value={logoUrl}
+                onChange={setLogoUrl}
                 disabled={isLoading}
+                maxSize={2}
               />
             </FormControl>
-            <input type="hidden" {...register('logoUrl')} />
-            {logoPreview && (
-              <div className="mt-2 relative h-40 w-full">
-                <Image
-                  src={logoPreview}
-                  alt="Logo preview"
-                  fill
-                  className="object-contain"
-                />
-              </div>
-            )}
+            <input type="hidden" {...register('logoUrl')} value={logoUrl} />
           </FormField>
 
           <div className="flex justify-end space-x-2">

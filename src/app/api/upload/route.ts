@@ -1,7 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { writeFile } from 'fs/promises';
-import { join } from 'path';
-import { v4 as uuidv4 } from 'uuid';
 import { getServerSession } from 'next-auth';
 import { authOptions, isAdmin } from '@/lib/auth';
 
@@ -11,7 +8,7 @@ export async function POST(request: NextRequest) {
     const session = await getServerSession(authOptions);
     if (!session || !isAdmin(session)) {
       return NextResponse.json(
-        { error: 'Unauthorized' },
+        { error: 'غير مصرح لك برفع الصور' },
         { status: 401 }
       );
     }
@@ -21,7 +18,7 @@ export async function POST(request: NextRequest) {
 
     if (!file) {
       return NextResponse.json(
-        { error: 'No file uploaded' },
+        { error: 'لم يتم اختيار ملف' },
         { status: 400 }
       );
     }
@@ -30,34 +27,38 @@ export async function POST(request: NextRequest) {
     const fileType = file.type;
     if (!fileType.startsWith('image/')) {
       return NextResponse.json(
-        { error: 'Only image files are allowed' },
+        { error: 'يُسمح فقط برفع ملفات الصور' },
         { status: 400 }
       );
     }
 
-    // Get file extension
-    const fileExtension = fileType.split('/')[1];
-    
-    // Create a unique filename
-    const fileName = `${uuidv4()}.${fileExtension}`;
-    
+    // Check file size (max 2MB for better performance)
+    if (file.size > 2 * 1024 * 1024) {
+      return NextResponse.json(
+        { error: 'حجم الملف يجب أن يكون أقل من 2 ميجابايت' },
+        { status: 400 }
+      );
+    }
+
     // Convert file to buffer
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
-    
-    // Save the file to the uploads directory
-    const uploadDir = join(process.cwd(), 'public', 'uploads');
-    const filePath = join(uploadDir, fileName);
-    await writeFile(filePath, buffer);
-    
-    // Return the file path that can be stored in the database
-    const fileUrl = `/uploads/${fileName}`;
-    
-    return NextResponse.json({ url: fileUrl });
+
+    // Convert to base64 data URL
+    const base64 = buffer.toString('base64');
+    const dataUrl = `data:${fileType};base64,${base64}`;
+
+    console.log('Image converted to base64, size:', Math.round(dataUrl.length / 1024), 'KB');
+
+    return NextResponse.json({
+      url: dataUrl,
+      message: 'تم رفع الصورة بنجاح'
+    });
+
   } catch (error) {
     console.error('Error uploading file:', error);
     return NextResponse.json(
-      { error: 'Failed to upload file' },
+      { error: 'فشل في رفع الملف. حاول مرة أخرى.' },
       { status: 500 }
     );
   }

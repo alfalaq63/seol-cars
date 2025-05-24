@@ -15,7 +15,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import Image from "next/image";
+import { ImageUpload } from "@/components/ui/image-upload";
 import { TrashIcon } from "@heroicons/react/24/outline";
 
 interface NewsFormProps {
@@ -30,10 +30,9 @@ export function NewsForm({ initialData, isEditing = false }: NewsFormProps) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [mainImagePreview, setMainImagePreview] = useState<string | null>(
-    initialData?.mainImage || null
+  const [mainImageUrl, setMainImageUrl] = useState<string>(
+    initialData?.mainImage || ""
   );
-  const [mainImageFile, setMainImageFile] = useState<File | null>(null);
   const [additionalImages, setAdditionalImages] = useState<
     { file: File; preview: string }[]
   >([]);
@@ -54,17 +53,7 @@ export function NewsForm({ initialData, isEditing = false }: NewsFormProps) {
     },
   });
 
-  const handleMainImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
 
-    setMainImageFile(file);
-    const reader = new FileReader();
-    reader.onload = () => {
-      setMainImagePreview(reader.result as string);
-    };
-    reader.readAsDataURL(file);
-  };
 
   const handleAdditionalImagesChange = (
     e: React.ChangeEvent<HTMLInputElement>
@@ -157,11 +146,8 @@ export function NewsForm({ initialData, isEditing = false }: NewsFormProps) {
       setIsLoading(true);
       setError(null);
 
-      // Upload main image if changed
-      if (mainImageFile) {
-        const mainImageUrl = await uploadImage(mainImageFile);
-        data.mainImage = mainImageUrl;
-      }
+      // Set main image URL
+      data.mainImage = mainImageUrl;
 
       // Create or update news
       const url = isEditing ? `/api/news/${initialData?.id}` : "/api/news";
@@ -243,24 +229,14 @@ export function NewsForm({ initialData, isEditing = false }: NewsFormProps) {
           <FormField name="mainImage">
             <FormLabel>الصورة الرئيسية</FormLabel>
             <FormControl>
-              <Input
-                type="file"
-                accept="image/*"
-                onChange={handleMainImageChange}
+              <ImageUpload
+                value={mainImageUrl}
+                onChange={setMainImageUrl}
                 disabled={isLoading}
+                maxSize={2}
               />
             </FormControl>
-            <input type="hidden" {...register("mainImage")} />
-            {mainImagePreview && (
-              <div className="mt-2 relative h-40 w-full">
-                <Image
-                  src={mainImagePreview}
-                  alt="Main image preview"
-                  fill
-                  className="object-contain"
-                />
-              </div>
-            )}
+            <input type="hidden" {...register("mainImage")} value={mainImageUrl} />
           </FormField>
 
           {isEditing && (
