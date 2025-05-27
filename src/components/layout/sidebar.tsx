@@ -10,13 +10,20 @@ import {
   NewspaperIcon,
   UserGroupIcon,
   HomeIcon,
+  ChartBarIcon,
+  GlobeAltIcon,
 } from '@heroicons/react/24/outline';
 
 const navigation = [
   {
-    name: 'الرئيسية',
+    name: 'الصفحة الرئيسية',
+    href: '/',
+    icon: GlobeAltIcon,
+  },
+  {
+    name: 'لوحة التحكم',
     href: '/dashboard',
-    icon: HomeIcon,
+    icon: ChartBarIcon,
   },
   {
     name: 'إدارة الشركات',
