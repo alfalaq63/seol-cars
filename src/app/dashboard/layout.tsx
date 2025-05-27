@@ -35,15 +35,15 @@ export default function DashboardLayout({
           ${sidebarOpen ? 'translate-x-0' : 'translate-x-full'}
         `}>
           {/* Mobile close button */}
-          <div className="lg:hidden absolute top-4 left-4">
+          <div className="lg:hidden absolute top-4 left-4 z-60">
             <button
               onClick={() => setSidebarOpen(false)}
-              className="p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100"
+              className="p-2 rounded-md text-white bg-red-500 hover:bg-red-600 shadow-lg"
             >
               <XMarkIcon className="h-6 w-6" />
             </button>
           </div>
-          <Sidebar />
+          <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
         </div>
 
         {/* Main content area */}
@@ -55,7 +55,7 @@ export default function DashboardLayout({
                 {/* Mobile menu button */}
                 <button
                   onClick={() => setSidebarOpen(true)}
-                  className="lg:hidden p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 mr-4"
+                  className="lg:hidden p-3 rounded-md text-white bg-blue-600 hover:bg-blue-700 shadow-lg mr-4 transition-colors duration-200"
                 >
                   <Bars3Icon className="h-6 w-6" />
                 </button>
