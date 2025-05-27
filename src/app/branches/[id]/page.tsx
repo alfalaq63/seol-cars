@@ -4,17 +4,14 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import dynamic from 'next/dynamic';
+import dynamicImport from 'next/dynamic';
 import { StaticMap } from '@/components/ui/static-map';
 
 // Force dynamic rendering
 export const dynamic = 'force-dynamic';
 
-
-// Remove unused interface
-
 // Import MapDisplay only on client side
-const MapDisplay = dynamic(
+const MapDisplay = dynamicImport(
   () => import('@/components/ui/map-display').then((mod) => mod.MapDisplay),
   {
     ssr: false,
